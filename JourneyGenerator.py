@@ -17,6 +17,7 @@ nextpoint = [] #index
 nextdist = [] #distance to corresponding point in nextdist
 event_dcs = []
 
+
 loopstarts = []
 loopends = []
 looprelatives = []
