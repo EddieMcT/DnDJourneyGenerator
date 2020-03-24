@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from scipy.spatial import voronoi_plot_2d, Voronoi
 import pandas
 
-#import saved data
 points = [] #assigned points
 #allowedpos = [startpos*granularity] #unused, was planned for use with arc constraints
 endgoal = [] #list of indices in points list
@@ -34,6 +33,8 @@ tilesx = []
 tilesy = []
 colours = []
 event_descriptions = []
+path_descriptions = []
+event_names = []
 
 paths= [] #paths that each point is on
 eventnames = [] #path id- event number
@@ -77,16 +78,15 @@ if load_old_data:
     cleanup("remdist",remdist,float)
     cleanup("paths",paths,int)
     cleanup("event_dcs",event_dcs,int)
-    for a in df_load["fixed"]:
-        fixed.append(a)
-    for a in df_load["colours"]:
-        colours.append(a)
-    for a in df_load["event_descriptions"]:
-        event_descriptions.append(a)
+    for a in range(0,len(df_load)):#variables that don't need cleaning up to any particular datatype, and can be read as-is
+        fixed.append(df_load["fixed"][a])
+        colours.append(df_load["colours"][a])
+        event_descriptions.append(df_load["event_descriptions"][a]) #Note: path descriptions not to be imported. These are remade each time in case of name changes or new connections
+        event_names.append(df_load["event_names"][a])
 
 
 
-pathvalues = [[]]#points on each path. To be calculated from paths[]
+pathvalues = [[]]#points on each path. To be calculated from paths
 pathpointx = [[]]
 pathpointy = [[]]
 
@@ -135,7 +135,19 @@ startpos = [0,0]
 endpos = [10,10]
 mainpathcolour = "W"
 if pathdistance > 0:
-    mainpathcolour = input("path colour") #Update with colour id list
+    colour_options = "WUBRGCDAVc"
+    colour_descriptions = ("Open fields or flat ground","Rivers or streams","Swamps, fens, or other muddy terrain","Mountains, hills, or rocky areas","Forests or other wooded areas","Coastline","Desert","Arctic or snowy terrain","Volcanic or geologically active areas","Caves")
+    for letterpos in range(0,len(colour_options)):
+        print(f"{letterpos}    ({colour_options[letterpos]})    {colour_descriptions[letterpos]}")
+    colour_input = input("What terrain best describes this part of your journey? (number or one-letter code)\n")
+    if colour_options.find(colour_input) != -1:
+        mainpathcolour = colour_input
+    else:
+        try:
+            mainpathcolour = colour_options[int(colour_input)]
+        except:
+            mainpathcolour = random.choice("WUBRG")
+            print(f"Not understood, using {mainpathcolour}")
 
 if load_old_data and pathdistance > 0:
     loadinput = input("Index of existing startpoint, type n for new startpoint\n")
@@ -177,7 +189,7 @@ elif pathdistance > 0:
         endpos = [float(newx),float(newy)]
     except:
         newx = float(pathdistance/2)
-        print(f"coordinates not recognised, beginning from origin ({newx},{newx})")
+        print(f"coordinates not recognised, endpoint set to default ({newx},{newx})")
         endpos = [newx,newx]
 
 if load_old_data and pathdistance > 0:
@@ -205,7 +217,8 @@ if pathdistance > 0: #build variable lists for start and end
         paths.append([])
         event_dcs.append([intractability])
         colours.append(mainpathcolour)
-        event_descriptions.append([""])
+        event_descriptions.append("Starting Point")
+        event_names.append(f"Point {len(points)-1} (starting point)")
     else:
         startpos = points[startindex]
     if not endexists:
@@ -223,7 +236,8 @@ if pathdistance > 0: #build variable lists for start and end
         paths.append([])
         event_dcs.append([intractability])
         colours.append(mainpathcolour)
-        event_descriptions.append([""])
+        event_descriptions.append("End Point")
+        event_names.append(f"Point {len(points)-1} (end point)")
     else:
         endpos = points[endindex] #recent fix, to be checked if problems arise
 
@@ -834,6 +848,7 @@ def eventgen(start,end,dist,diff,currentpathid,pathcolour):
             previousvalues.append(int(previous[0]))
             pathvalues[currentpathid] = previousvalues
             fixed.append(False)
+            event_names.append(f"Point {len(points)-1}")
             forces.append([])
             local_dc = min(random.randrange(5,diff),random.randrange(5,diff))
             local_terrain = eventterrain(pathcolour)
@@ -1111,7 +1126,11 @@ setscore = 1
 threshold = 0.5
 turnsnochange = 0
 attempt = 0
-attemptsmax = int(max(5000/len(points),1) )
+try:
+    attempt_input = int(input("Map-making calculations to perform? \n(High means more time calculating, low means some distances may not be correct. Minimum is ten, default is 5000)\n"))
+except:
+    attempt_input = 5000
+attemptsmax = int(max(attempt_input/len(points),10) )
 steps = 10
 temperature = originaltemp
 
@@ -1181,27 +1200,22 @@ while not done:
 
 if setscore > bestscore:
     points = bestpoints
-    print(f"Reverting to bestscore {bestscore}, using {bestpoints}")
+    print(f"Reverting to bestscore {bestscore}")
 else:
-    print(f"using current score {setscore} instead of {bestscore}")
+    print(f"using current score {setscore}")
 setscore = 0
 for i in range(0,len(points)): #evaluate current scores
     coordinates = [0.0,0.0]
     coordinates[0] = float(points[i][0])
     coordinates[1] = float(points[i][1])
     if not fixed[i]:
-        checktime = True
+        checktime = False#True here will cause the program to print the components of the score. Can be useful information, but very verbose and difficult to read
     else:
         checktime = False
-    setscore += calc_score(i, coordinates[0],coordinates[1],checktime)
-print(setscore/len(points))
-#for i in (endgoal, "remdist", remdist, "startpoint",startpoint, "fromdist",fromdist, "prevpoint",prevpoint, "prevdist",prevdist,"nextpoint,dist",nextpoint,nextdist,"loopstarts,ends",loopstarts,loopends,looprelatives,loopbasedist,loopdist,"looplast, remainders",looplast,loopremainders,"pathvalues",pathvalues):
-#    print(i)
-
-
-
+    setscore += float(calc_score(i, coordinates[0],coordinates[1],checktime)/len(points))
+print(setscore)
 backgroundpoints = []
-backgroundrange = [[0,0],[0,0]]
+backgroundrange = [[points[0][0],points[0][0]],[points[0][1],points[0][1]]] #initial value of range is first point, so that it starts in the right area (ie not with a default minimum of 0 when all values are over 100)
 
 for point in (points):
     backgroundrange[1][1] = int(max(point[1],backgroundrange[1][1]))
@@ -1209,13 +1223,21 @@ for point in (points):
     backgroundrange[0][1] = int(max(point[0],backgroundrange[0][1]))
     backgroundrange[0][0] = int(min(point[0],backgroundrange[0][0]))
 
+backgroundsize = [backgroundrange[0][1]-backgroundrange[0][0],backgroundrange[1][1]-backgroundrange[1][0]]
 
+""" random background points, replaced with hex-grid
+for n in range(0,100):
+    backgroundpoints.append([random.randrange(backgroundrange[0][0]-int(backgroundsize[0]),backgroundrange[0][1]+int(backgroundsize[0])),random.randrange(backgroundrange[1][0]-int(backgroundsize[1]),backgroundrange[1][1]+int(backgroundsize[1]))])
+"""
 
-for n in range(0,20):
-    backgroundpoints.append([random.randrange(backgroundrange[0][0]-10,backgroundrange[0][1]+10),random.randrange(backgroundrange[1][0]-10,backgroundrange[1][1]+10)])
+for y_val in range (backgroundrange[1][0]-int(backgroundsize[1]/5),backgroundrange[1][1]+int(backgroundsize[1]/5)):#generate centers of background hex
+    x_start = numpy.average(backgroundrange[0]) - (backgroundsize[0]*0.86602540378)
+    for x_val in range (0,backgroundsize[0]):
+        backgroundpoints.append([((x_val*1.73205080757)+ x_start), y_val])
+        backgroundpoints.append([((x_val*1.73205080757) + x_start +0.86602540378),y_val+0.5])
 
 pathmap = Voronoi((points+backgroundpoints))
-fig = voronoi_plot_2d(pathmap, show_vertices=False, line_alpha = 0.0)
+fig = voronoi_plot_2d(pathmap, show_vertices=False, line_alpha = 0.0, show_points = False)
 
 for path in range(0,len(pathvalues)):
     for event in pathvalues[path]:
@@ -1223,19 +1245,25 @@ for path in range(0,len(pathvalues)):
         pathpointy[path].append(float(points[event][1]))
     plt.plot(pathpointx[path],pathpointy[path],linewidth=1, c=[random.random(),random.random(),random.random()])
 
+for pointindex in range (0,len(points)):#build path descriptions for the save file
+    local_path_description = ""
+    for direction in range (0,len(prevdist[pointindex])):
+        local_path_description = local_path_description + f"{int(prevdist[pointindex][direction])} miles from {event_names[prevpoint[pointindex][direction]]}. "
+    for direction in range (0,len(nextdist[pointindex])):
+        local_path_description = local_path_description + f"{int(nextdist[pointindex][direction])} miles to {event_names[nextpoint[pointindex][direction]]}. "
+    path_descriptions.append(local_path_description)
+
 """
 Create Dataframe to save
 Variables still to save:
-
-,"backgroundpoints","eventnames"
 
 ,backgroundpoints,eventnames
 Loop info?
 """
 
 dictsave = {}
-names = ["nextpoint","nextdist","prevpoint","prevdist","startpoint","fromdist","endgoal","remdist","points","event_dcs","colours","event_descriptions","paths","fixed"]
-variables = [nextpoint,nextdist,prevpoint,prevdist,startpoint,fromdist,endgoal,remdist,points,event_dcs,colours,event_descriptions,paths,fixed]
+names = ["nextpoint","nextdist","prevpoint","prevdist","startpoint","fromdist","endgoal","remdist","paths","points","event_dcs","colours","event_descriptions","path_descriptions","fixed","event_names"]
+variables = [nextpoint,nextdist,prevpoint,prevdist,startpoint,fromdist,endgoal,remdist,paths,points,event_dcs,colours,event_descriptions,path_descriptions,fixed,event_names]
 for i in range(0,len(names)):
     dictsave[names[i]] = variables[i]
 
@@ -1260,27 +1288,45 @@ def local_colour(colour_code):
     for letter in "WUBRGCDAVc":
         if not colour_code.find(letter) == -1:
             true_code = true_code + letter
-    return terrain_colour[true_code]
+    try:
+        return terrain_colour[true_code]
+    except:
+        if len(true_code) >= 2:
+            return "xkcd:gold"
+        else:
+            return "xkcd:grey"
 
-for region in range(0,len(colours)):
+for region in range(0,len(pathmap.regions)):
     indexlist = pathmap.regions[region]
     tilesx.append([])
     tilesy.append([])
+    tileaverage = [0,0]
     for point in indexlist:
-        if point >= 0:
+        if point >= 0: #index value of -1 here would indicate a point at infinity, not the final point in the list.
             tilesx[region].append(pathmap.vertices[point][0])
             tilesy[region].append(pathmap.vertices[point][1])
-    print(tilesx[region],tilesy[region],pathmap.regions[region])
+    #print(tilesx[region],tilesy[region],pathmap.regions[region])
     if len(tilesx[region]) >= 3:
-        region_colour = local_colour(colours[region])
+        tileaverage = [sum(tilesx[region])/len(tilesx[region]),sum(tilesy[region])/len(tilesy[region])]
+        mindist = max(backgroundsize)/5 #adjust this for a cutoff on terrain area spreading
+        region_colour = "white"
+        for pointindex in range (0,len(points)):
+            newdist = distance(points[pointindex],tileaverage)
+            if newdist < mindist:
+                mindist = newdist
+                region_colour = local_colour(colours[pointindex])
         plt.fill(tilesx[region],tilesy[region],region_colour)
 
-plt.show()
+for pointindex in range(0,len(points)):
+    plt.text(points[pointindex][0],points[pointindex][1],event_names[pointindex])
 
+
+plt.xlim(numpy.average(backgroundrange[0])-float(max(backgroundsize)*0.6),numpy.average(backgroundrange[0])+float(max(backgroundsize)*0.6))
+plt.ylim(numpy.average(backgroundrange[1])-float(max(backgroundsize)*0.6),numpy.average(backgroundrange[1])+float(max(backgroundsize)*0.6))
+plt.show()
 
 dfsave = pandas.DataFrame(dictsave)
 print(dfsave)
-
 
 save = input("Save new points? y/n\n")
 if (not save.find("y")  ==-1)  or not (save.find("Y") == -1):
