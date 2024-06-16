@@ -39,44 +39,56 @@ def text_construct(input = test_dict, text = '[0]'):
     text = replace_set(text, {'{':'[', '}':']'})
     return(text)
 
-print(text_construct())
 
-ruindict = {
-    0: ('The path goes [path_location] a[ruindescription] [ruin].', 
-            "A[ruindescription] [ruin] is [location]."),
-    'ruindescription': ("n abandoned", "n overgrown"," decayed","n ancient", " ruined", ' collapsed'),
+
+ruindict = { #General rule: use [n] as a grammatical placeholder for a/an, and replace after generation is complete. Needs to be done after the main construction function
+    0: ('The path goes [path_location] a[n] [description] [building].', 'The path goes [path_location] a[n] [building] [post_description].', 
+            "A[n] [description] [building] is [location]."),
+    'description' : ('','[basic_description]', '[ruin_description]'),
+    'ruin_description': ("abandoned", "overgrown","decayed","ancient", "ruined"),
+    'basic_description': (),
     'path_location': ("through","past","next to","around"),
     'location': ("up ahead","just off the path","visible nearby",
                 "a short walk away from the path","a half-mile off the path"),
+    'person_types': ('[intellectual]', '[religious_figure]', '[person]'),
     'intellectual': ('wizard', 'sorcerer', 'artificer', 'alchemist'),
+    'religious_figure' : ('deity', 'minor deity', 'priest', 'prophet', 'religious figure'),
+    'person' : ('person', 'child', 'folk hero', 'warrior') , 
     'int_location': ('study', 'library', 'tower'),
-    'renown': (' famous', 'n infamous', ' well-renowned', ' lesser known'),
+    'renown': ('famous', 'infamous', 'well-renowned', 'lesser known'),
     'faction': ('criminal club', 'guild', 'secret society', 'enemy faction', 'social club'), 
-    'ruin': ("inn","house", "tower","wall","staircase","pillar","hut","building","fountain","well",
-                "fortress","watchtower","outpost", "keep", "castle","guard station", 
-                "temple","monastery","reliquary","battlefield", 
-                "tomb","crypt","necropolis","memorial stone","graveyard",
-                "quarry","orchard","hunting stand", "mine","farm","windmill","garden", "hunter/fisherman's shack"
-                "[int_location] of a[renown] [intellectual]","[int_location]","artificer’s factory","alchemist's lab",
-                "private meeting house for a [faction]",
-                "private meeting house for a[renown] [faction]"
-                )
+    'monuments': ("sealed burial mound","plundered burial mound",
+                  "[common_monuments]", "[ruin_description] [common_monuments]"),
+    'common_monuments': ('obelisk', 'statue of a[n] [person_types]','statue of a[n] [renown] [person_types]',"circle of standing stones","totem pole","wayshrine"),
+    'rare_monuments': (),
+    'building': ('[basic_buildings]','[milit_buildings]' ,'[religious_buildings]' ,'[production_buildings]' , '[int_buildings]' ,'[meeting_buildings]','[tomb_buildings]' ),
+    'basic_buildings' : ("inn","house", "tower","wall","staircase","pillar","hut","building","fountain","well", "archway"),
+    'milit_buildings' : ("fortress","watchtower","outpost", "keep", "castle","guard station"),
+    'religious_buildings' : ("temple","monastery","reliquary","battlefield", ),
+    'tomb_buildings' : ("tomb","crypt","necropolis","memorial stone","graveyard"),
+    'production_buildings' : ("quarry","orchard","hunting stand", "mine","farm","windmill","garden", "hunter/fisherman's shack"),
+    'int_buildings' : ("[int_location] of a[renown] [intellectual]","[int_location]","artificer’s factory","alchemist's lab"),
+    'meeting_buildings' : ("private meeting house for a [faction]","private meeting house for a[renown] [faction]"),
 } #to do: cairn
 
-def specific_ruins(colours):
-    if len(colours) > 2:
-        filtered_colours = colours[0:2]
-    else:
-        filtered_colours = colours
-    specific_ruin_options = {"W":("inn","house",),"U":("docks","sunken ruins","fountain","well",),"B":("graveyard",),"R":("R",),"G":("hunting station","garden",),"C":("sunken ruins","seafloor debris",),"D":("D",),"V":("V",),"A":("A",),"c":("mine",),"WW":("fortress","watchtower","outpost","castle",),"UW":("customs office",),"BW":("memorial stone",),"RW":("quarry","watchtower",),"GW":("orchard","garden",),"CW":("coastal tower","lighthouse","port",),"DW":("DW",),"VW":("VW",),"AW":("AW",),"cW":("open quarry",),"WU":("reliquary","canal","fountain","well",),"UU":("alchemist's lab","artificer's study","library","sunken ruins","artificer’s factory","well",),"BU":("private meeting house for a criminal club","private meeting house for a guild","private meeting house for a secret society)","sunken ruins",),"RU":("sorcerer's study",),"GU":("canal","well",),"CU":("port",),"DU":("DU",),"VU":("VU",),"AU":("AU",),"cU":("cU",),"WB":("temple","monastery",),"UB":("smuggler's hideout","sunken ruins",),"BB":("tomb","crypt","bog wreckage/offerings","necropolis",),"RB":("cairns",),"GB":("GB",),"CB":("CB",),"DB":("DB",),"VB":("VB",),"AB":("AB",),"cB":("barrow, swarmyard",),"WR":("battlefield",),"UR":("wizard's tower",),"BR":("cairns",),"RR":("keep",),"GR":("tinder farm","game trail",),"CR":("CR",),"DR":("DR",),"VR":("VR",),"AR":("AR",),"cR":("cR",),"WG":("farm","windmill","garden",),"UG":("fisherman's hut",),"BG":("BG",),"RG":("game trail",),"GG":("forestry stand","copse",),"CG":("CG",),"DG":("DG",),"VG":("VG",),"AG":("AG",),"cG":("cG",)}
-    options = ["n abandoned", "n overgrown"," decayed","n ancient"]
-    chosen = random.choice(specific_ruin_options[filtered_colours])
-    if chosen.find("ruin") == -1:
-        options.append((" ruined"))
-    if random.random()<0.5:
-        location_options = ("up ahead","just off the path","visible nearby","a short walk away from the path","a half-mile off the path")
-        return (f"A{random.choice(options)} {chosen} is {random.choice(location_options)}.", chosen)
-    else:
-        location_options = ("through","past","next to","around")
-        return (f"The path goes {random.choice(location_options)} a{random.choice(options)} {chosen}.", chosen)
+print(text_construct(ruindict))
 
+
+def monument():
+    writing_options = ["a warning","a blessing","historical lore","a memorial","religious iconography","a holy symbol","an unholy symbol","arcane symbols","ancient graffiti", "a riddle"]
+    surrounding_options = ["fresh flowers","a strange smell", "unnatural mist"]
+    options = [f"surrounded by {random.choice(surrounding_options)}", f"etched with {random.choice(writing_options)}"]
+    location_options = ("up ahead","just off the path","visible nearby","a short walk away from the path","a half-mile off the path")
+    if random.random() > 0.95:
+        chosen = random.choice(("sealed pyramid", "plundered pyramid","group of faces, carved into a mountainside or cliff,","group of giant statues, carved out of a mountainside or cliff,","sealed tomb", "plundered tomb","sealed catacomb", "plundered catacomb", "plundered temple","circle of standing stones"))
+    else:
+        chosen = random.choice(())
+    if "aeiou".find(chosen[0]) == -1:
+        state_text = "A"
+    else:
+        state_text = "An"
+    if random.random() < 0.5:
+        post_text = f", {random.choice(options)}, is {random.choice(location_options)}."
+    else:
+        post_text = f" is {random.choice(location_options)}."
+    return (f"{state_text} {chosen}{post_text}", "monument",)
