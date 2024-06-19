@@ -55,40 +55,32 @@ structure_0 = ('The path runs [path_location] a[n] [description] [structure].', 
 
 structuredict = { #General rule: use a[n] as a grammatical placeholder for a/an, and replace after generation is complete. Needs to be done after the main construction function
     0: structure_0,
-    'structure' : ('[building]', '[monument]','signpost [signpost]' ), #old: (specific_ruins(colours),random_ruins(),monument(),signpost(DC),shop(),village())
+    'structure' : ('[building]',), #Necessary? Broaden perhaps?
     'description' : ('[basic_description]', '[ruin_description]'),
     'ruin_description': ruins,
     'basic_description': ('great', "ancient", 'stone','makeshift', 'flimsy', 'large'),
     'post_description': ('etched with [writing]', 'with [writing] carved into it',
-                          'made from [material]' , 'carved from the native rock', 'set into nearby trees',
+                          'made from [material]' ,
                          'surrounded by [surroundings]', 'with [surroundings] around it',
                          'long since [ruin_description]', 'visibly [ruin_description]', 'nearly [ruin_description]' , 'recently [ruin_description]'),
     'writing': writing,
     'surroundings' : surroundings,
     'path_location': path_loc,
     'location': location,
-    'person_types': ('[intellectual]', '[religious_figure]', '[person]'),
     'intellectual': ('wizard', 'sorcerer', 'artificer', 'alchemist'),
-    'religious_figure' : ('deity', 'minor deity', 'priest', 'prophet', 'religious figure'),
-    'person' : ('person', 'child', 'folk hero', 'warrior', 'unknown figure', 'soldier') , 
     'int_location': ('study', 'library', 'tower'),
     'renown': renown,
     'faction': ('criminal club', 'guild', 'secret society', 'enemy faction', 'social club'), 
     'material': ('native rock', 'assorted stones', 'imported marble', 'mismatched stones', 'half rotted wood', 'fine wood','unusual materials'),
-    'monument': ("[common_monuments]", "[ruin_description] [common_monuments]"),
-    'common_monuments': ("burial mound",'obelisk', 'gravestone of a[n] [person_types]','statue of a[n] [person_types]','statue of a[n] [renown] [person_types]',"circle of standing stones","totem pole","wayshrine", "[rare_monuments]"),
-    'rare_monuments': ("pyramid",
-                       "group of carved faces","group of giant statues",#Check interactions
-                       "scatacomb", "circle of standing stones"),
     'building': ('[basic_buildings]','[milit_buildings]' ,'[religious_buildings]' ,'[production_buildings]' , '[int_buildings]' ,'[meeting_buildings]','[tomb_buildings]'),
-    'basic_buildings' : ("inn","house", "tower","wall","staircase","pillar","hut","building","fountain","well", "archway"),
+    'basic_buildings' : ("inn","house", "tower","hut","building",),
     'milit_buildings' : ("fortress","watchtower","outpost", "keep", "castle","guard station"),
     'religious_buildings' : ("temple","monastery","reliquary" ),
     'tomb_buildings' : ("tomb","crypt","necropolis","memorial stone","graveyard"),
     'production_buildings' : ("quarry","orchard","hunting stand", "mine","farm","windmill","garden", "hunter/fisherman's shack"),
     'int_buildings' : ("[int_location] of a[n] [renown] [intellectual]","[int_location]","artificer’s factory","alchemist's lab"),
     'meeting_buildings' : ("private meeting house for a [faction]","private meeting house for a[renown] [faction]"),
-} #to do: cairn, battlefield
+} #to do: battlefield
 
 magicalextension = {
     'material':('strange metals', 'living wood'),
@@ -96,7 +88,7 @@ magicalextension = {
     'person_types': ('party member'),
     'renown': ('long forgotten'),
     'writing': ('glowing runes', 'bizarre symbols'),
-    'basic_description':('haunted', 'illusory'),
+    'basic_description':('haunted', 'illusory', 'cursed', 'enchanted'),
     'surroundings':('a faint glow', 'mysterious lights', 'an unnatural chill',"mist", 'unusual plants' ),
     'post_description': ('carved from the native rock', 'set into nearby trees')
     }
@@ -114,7 +106,7 @@ structureextension_shelter = {
 signpost_dict = {0: structure_0,#Currently duplicated from structure_dict, to be revised
     'structure' : ("signpost with signs pointing towards [signpost_common]",  
                  "sign listing the distance to [signpost_common]","signpost with signs showing direction and distance to [signpost_common]",
-                 "sign listing the walking times to [signpost_common]","post with signs showing direction and walking time to [signpost_common]",
+                 "sign listing the walking times to [signpost_common]","signpost with signs showing direction and walking time to [signpost_common]",
                  ),
     'description' : ('[basic_description]', '[ruin_description]'),
     'ruin_description': ruins,
@@ -126,12 +118,44 @@ signpost_dict = {0: structure_0,#Currently duplicated from structure_dict, to be
                          'long since [ruin_description]', 'visibly [ruin_description]', 'nearly [ruin_description]'),
     'writing': writing,
     'surroundings' : surroundings,
-    'path_location': path_loc,
+    'path_location': ("past","next to","around", 'alongisde'),
     'location': location,
     'material': ('stone', 'half rotted wood', 'fine wood','unusual materials', 'cheap timber'),
     'signpost_common': ('nearby points of interest', 'several cities and settlements', 'multiple places', 'nearby inns', 'natural features of the terrain'),
     }
-
+statue_dict = { 
+    0: structure_0,
+    'structure' : ('[monument]',), #Necessary? Broaden perhaps?
+    'description' : ('[basic_description]', '[ruin_description]'),
+    'ruin_description':  ("overgrown","ruined", "toppled", 'fallen'),
+    'basic_description': ('great', "ancient",'flimsy', 'large', 'crumbling'),
+    'post_description': ('etched with [writing]', 'with [writing] carved into it',
+                          'made from [material]' , 'carved from the native rock',
+                          'surrounded by [surroundings]', 'with [surroundings] around it',
+                         'long since [ruin_description]', 'visibly [ruin_description]', 'nearly [ruin_description]' , 'recently [ruin_description]'),
+    'writing': writing,
+    'surroundings' : surroundings,
+    'path_location': ("past","next to","around", 'alongisde'),
+    'location': location,
+    'person_types': ('[intellectual]', '[religious_figure]', '[person]'),
+    'intellectual': ('wizard', 'sorcerer', 'artificer', 'alchemist'),
+    'religious_figure' : ('deity', 'minor deity', 'priest', 'prophet', 'religious figure'),
+    'person' : ('person', 'child', 'folk hero', 'warrior', 'unknown figure', 'soldier') , 
+    'int_location': ('study', 'library', 'tower'),
+    'renown': renown,
+    'faction': ('criminal club', 'guild', 'secret society', 'enemy faction', 'social club'), 
+    'material': ('native rock', 'assorted stones', 'imported marble', 'mismatched stones', 'half rotted wood', 'fine wood','unusual materials'),
+    'monument': ("[common_monuments]", "[ruin_description] [common_monuments]"),
+    'common_monuments': ('obelisk', "standing stone", 'henge', '[building_fragment]',
+                         '[grave_monuments] of a[n] [person_types]','[grave_monuments] of a[n] [renown] [person_types]',
+                         'statue of a[n] [person_types]', 'statue of a[n] [renown] [person_types]',
+                         "[rare_monuments]"),
+    'rare_monuments': ("pyramid",
+                       "group of carved faces","group of giant statues",#Check interactions
+                       "circle of standing stones","totem pole","wayshrine", ),
+    'grave_monuments': ("memorial stone", 'cairn',"burial mound",'gravestone'),
+    'building_fragment': ("wall","staircase","pillar","fountain","well", "archway",),
+} 
 
 shelter_dict = {
     0: ('The path runs [path_location] a[n] [description] [structure].', 
@@ -148,9 +172,9 @@ shelter_dict = {
     'structure': ('[shop]', '[settlement]', '[campsite]'),
     'shop':("inn","roadside stall", "[storekeep]'s store", "[storekeep]'s shop", "roadside stall of a [storekeep]"),
     'storekeep':("alchemist", "greengrocer", 'local farmer','[renown] criminal pretending to be a [storekeep]'),
-    'settlement':(), 
-    'campsite':(),
-    'structure_pos': ('built up', 'scattered', 'loosely'), #Eg a shop (is/can be found) [structure_pos] around the structure
+    'settlement':('town', 'village','hamlet', 'settlement' ), 
+    'campsite':('campsite', 'camp'),
+    'structure_pos': ('built up', 'scattered', 'loosely', 'scattered loosely', 'clustered'), #Eg a shop (is/can be found) [structure_pos] around the structure
     'description' : ('[basic_description]','[renown]', '[ruin_description]'),
     'renown' : renown,
     'ruin_description': ("abandoned","ruined", "plundered", "half-buried", 'empty'),
@@ -188,7 +212,7 @@ class event():
             self.extend(k,v)
         for k, v in extra_keys.items(): #Dict of booleans indicating whether to add the standard extras of that type
             if k in self.extra_dict.keys() and v:
-                for k1, v1 in self.extra_dict[k]:
+                for k1, v1 in self.extra_dict[k].items():
                     self.extend(k1, v1)
         output = text_construct(input = self.temp_dict, text = input)
         return (output)
@@ -196,8 +220,9 @@ class event():
 structure_event = event(structuredict, extras={'magical':magicalextension})
 signpost_event = event(signpost_dict, extras={'magical':magicalextension})
 shelter_event = event(shelter_dict, extras={'magical':magicalextension, 'structure':structureextension_shelter})
+statue_event = event(statue_dict, extras={'magical':magicalextension})
 
-print(signpost_event.generate())
+#print(signpost_event.generate())
 
 def generate_event(DC = 10):
     is_structure = False 
@@ -220,39 +245,41 @@ def generate_event(DC = 10):
             is_magic = True
         else:
             is_magic = False
-        if random.random() < 0.3: #Uninhabited structures, walls, ruins, etc.
+        if random.random() < 0.93: #Uninhabited structures, walls, ruins, etc.
             new_text = structure_event.generate(extra_keys={'magical':is_magic})
             event_text = event_text + new_text + "\n"
             is_structure = True
-        if random.random() < 0.3: #Signposts
+        if random.random() < 0.93: #Signposts
             new_text = signpost_event.generate(extra_keys={'magical':is_magic})
             event_text = event_text + new_text + "\n"
-            is_structure = True
+        if random.random() < 0.93: #Statue/monument
+            new_text = statue_event.generate(extra_keys={'magical':is_magic})
+            event_text = event_text + new_text + "\n"
         
-        if random.random() < 0.3: #Potentially inhabited structure, camps, villages, shops
-            new_text = text_construct(shelterdict)
+        if random.random() < 0.93: #Potentially inhabited structure, camps, villages, shops
+            new_text = shelter_event.generate(extra_keys={'magical':is_magic, 'structure':is_structure})
             event_text = event_text + new_text + "\n"
 
 
-        if random.random() < 0.3:
+        if False and random.random() < 0.3:
             new_text = item(DC)
             event_text = event_text + new_text + " "
-        if is_leyline:
+        if False and is_leyline:
             new_text = leyline(DC,colours)
             event_text = event_text + new_text + " "
-        if random.random() < 0.3:
+        if False and random.random() < 0.3:
             new_text = shelter(DC)
             event_text = event_text + new_text + " "
-        if random.random() < 0.1:
+        if False and random.random() < 0.1:
             new_text = sensory_event(0)
             event_text = event_text + new_text + " "
-        if random.random() < 0.3:
+        if False and  random.random() < 0.3:
             new_text = hazard(DC, random.choice(colours))
             event_text = event_text + new_text + " "
-        if random.random() < 0.3:
+        if False and random.random() < 0.3:
             new_text = difficulty(DC, random.choice(colours))
             event_text = event_text + new_text + " "
-        if random.random() < 0.3:
+        if False and random.random() < 0.3:
             if random.random() < float(DC/100):
                 is_second = True
             else:
@@ -264,6 +291,6 @@ def generate_event(DC = 10):
                 event_text = event_text + new_text + " "
     return event_text
 
-
+print (generate_event())
 
 
